@@ -1,0 +1,283 @@
+function doPost(e) {
+    try {
+        const data = JSON.parse(e.postData.contents);
+        const ss = SpreadsheetApp.getActiveSpreadsheet();
+
+        // Обработка разных типов запросов
+        if (data.type === 'getStock') {
+            return getStock(ss, data);
+        } else if (data.type === 'order') {
+            return saveOrder(ss, data);
+        } else if (data.type === 'getTimer') {
+            return getTimer(ss, data);
+        }
+
+        return respond({ status: 'error', msg: 'Unknown type' });
+
+    } catch(err) {
+        return respond({ status: 'error', msg: err.message });
+    }
+}
+
+function doGet(e) {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const type = e.parameter.type;
+
+    if (type === 'getStock') {
+        const weekKey = e.parameter.weekKey;
+        const stock = getStockData(ss, weekKey);
+        return respond(stock);
+    }
+
+    if (type === 'getTimer') {
+        const weekKey = e.parameter.weekKey;
+        const timer = getTimerData(ss, weekKey);
+        return respond(timer);
+    }
+
+    return respond({ status: 'ok' });
+}
+
+// ============================================================
+//  ПОЛУЧИТЬ ОСТАТОК ТОВАРА
+// ============================================================
+function getStock(ss, data) {
+    const stock = getStockData(ss, data.weekKey);
+    return respond(stock);
+}
+
+function getStockData(ss, weekKey) {
+    let sheet = ss.getSheetByName('Остатки');
+    if (!sheet) {
+        sheet = ss.insertSheet('Остатки');
+        sheet.getRange(1,1,1,4).setValues([['Неделя','Всего','Продано','Остаток']]);
+        sheet.getRange(1,1,1,4).setBackground('#1a1a1a').setFontColor('#fff').setFontWeight('bold');
+    }
+
+    const data = sheet.getDataRange().getValues();
+    for (let i = 1; i < data.length; i++) {
+        if (data[i][0] === weekKey) {
+            return {
+                status:  'ok',
+                weekKey: weekKey,
+                total:   data[i][1],
+                sold:    data[i][2],
+                left:    data[i][3]
+            };
+        }
+    }
+
+    return { status: 'ok', weekKey, total: 0, sold: 0, left: 0 };
+}
+
+// ============================================================
+//  ПОЛУЧИТЬ ТАЙМЕР
+// ============================================================
+function getTimer(ss, data) {
+    const timer = getTimerData(ss, data.weekKey);
+    return respond(timer);
+}
+
+function getTimerData(ss, weekKey) {
+    let sheet = ss.getSheetByName('Таймеры');
+    if (!sheet) {
+        sheet = ss.insertSheet('Таймеры');
+        sheet.getRange(1,1,1,3).setValues([['Неделя','Начало','Конец']]);
+        sheet.getRange(1,1,1,3).setBackground('#1a1a1a').setFontColor('#fff').setFontWeight('bold');
+    }
+
+    const data = sheet.getDataRange().getValues();
+    for (let i = 1; i < data.length; i++) {
+        if (data[i][0] === weekKey) {
+            return {
+                status:   'ok',
+                weekKey:  weekKey,
+                start:    data[i][1],
+                end:      data[i][2]
+            };
+        }
+    }
+
+    // Создаём новый таймер
+    const now   = new Date();
+    const day   = now.getDay();
+    const diff  = (8 - day) % 7 || 7;
+    const end   = new Date(now);
+    end.setDate(now.getDate() + diff);
+    end.setHours(0, 0, 0, 0);
+
+    const start = new Date(end);
+    start.setDate(end.getDate() - 7);
+
+    sheet.appendRow([weekKey, start.toISOString(), end.toISOString()]);
+
+    return {
+        status:  'ok',
+        weekKey: weekKey,
+        start:   start.toISOString(),
+        end:     end.toISOString()
+    };
+}
+
+// ============================================================
+//  СОХРАНИТЬ ЗАКАЗ
+// ============================================================
+function saveOrder(ss, data) {
+    // Лист заказов
+    let ordersSheet = ss.getSheetByName('Заказы');
+    if (!ordersSheet) {
+        ordersSheet = ss.insertSheet('Заказы');
+        ordersSheet.getRange(1,1,1,13).setValues([[
+            '№ Заказа','Дата','Имя','Телефон','Email',
+            'Адрес','Товар','Неделя','Цена','Доставка','Карта','Статус','Устройство'
+        ]]);
+        ordersSheet.getRange(1,1,1,13)
+            .setBackground('#1a1a1a').setFontColor('#fff').setFontWeight('bold');
+        ordersSheet.setFrozenRows(1);
+    }
+
+    ordersSheet.appendRow([
+        data.orderNum,
+        data.date,
+        data.name,
+        data.phone,
+        data.email,
+        data.address,
+        data.product,
+        data.week,
+        data.price,
+        data.delivery,
+        data.card,
+        'Новый',
+        data.device || 'Не указано'
+    ]);
+
+    // Цвет строки
+    const lastRow = ordersSheet.getLastRow();
+    ordersSheet.getRange(lastRow, 12).setBackground('#1a472a').setFontColor('#fff');
+
+    // Обновляем остаток
+    updateStock(ss, data.weekKey, data.totalStock);
+
+    // Email уведомление
+    notifyAdmin(data);
+
+    // Обновляем сводку
+    updateSummary(ss);
+
+    return respond({ status: 'ok', orderNum: data.orderNum });
+}
+
+// ============================================================
+//  ОБНОВИТЬ ОСТАТОК
+// ============================================================
+function updateStock(ss, weekKey, totalStock) {
+    let sheet = ss.getSheetByName('Остатки');
+    if (!sheet) {
+        sheet = ss.insertSheet('Остатки');
+        sheet.getRange(1,1,1,4).setValues([['Неделя','Всего','Продано','Остаток']]);
+        sheet.getRange(1,1,1,4).setBackground('#1a1a1a').setFontColor('#fff').setFontWeight('bold');
+    }
+
+    const data = sheet.getDataRange().getValues();
+    for (let i = 1; i < data.length; i++) {
+        if (data[i][0] === weekKey) {
+            const sold = data[i][2] + 1;
+            const left = data[i][1] - sold;
+            sheet.getRange(i+1, 3).setValue(sold);
+            sheet.getRange(i+1, 4).setValue(Math.max(0, left));
+
+            // Цвет если мало
+            if (left <= 10) {
+                sheet.getRange(i+1, 4).setBackground('#4a1010').setFontColor('#ff6b6b');
+            }
+            return;
+        }
+    }
+
+    // Новая неделя
+    const total = totalStock || 150;
+    sheet.appendRow([weekKey, total, 1, total - 1]);
+}
+
+// ============================================================
+//  СВОДНАЯ СТАТИСТИКА
+// ============================================================
+function updateSummary(ss) {
+    let sheet = ss.getSheetByName('Сводка');
+    if (!sheet) {
+        sheet = ss.insertSheet('Сводка');
+    }
+
+    sheet.clear();
+    sheet.getRange(1,1).setValue('СВОДКА JUM-ЖОМ').setFontSize(14).setFontWeight('bold').setFontColor('#a855f7');
+    sheet.getRange(2,1).setValue('Обновлено: ' + new Date().toLocaleString('ru-RU')).setFontColor('#999');
+
+    const ordersSheet = ss.getSheetByName('Заказы');
+    if (!ordersSheet) return;
+
+    const orders = ordersSheet.getDataRange().getValues();
+    const totalOrders = orders.length - 1;
+
+    // Сумма
+    let totalRevenue = 0;
+    for (let i = 1; i < orders.length; i++) {
+        const price = String(orders[i][8]).replace(/\D/g,'');
+        totalRevenue += parseInt(price) || 0;
+    }
+
+    sheet.getRange(4,1,1,2).setValues([['Показатель','Значение']]);
+    sheet.getRange(4,1,1,2).setBackground('#1a1a1a').setFontColor('#fff').setFontWeight('bold');
+
+    sheet.getRange(5,1,5,2).setValues([
+        ['Всего заказов',       totalOrders],
+        ['Общая выручка',       totalRevenue + ' ₽'],
+        ['Средний чек',         totalOrders ? Math.round(totalRevenue/totalOrders) + ' ₽' : '0 ₽'],
+        ['Последний заказ',     totalOrders ? orders[orders.length-1][1] : '—'],
+        ['Последний покупатель',totalOrders ? orders[orders.length-1][2] : '—']
+    ]);
+}
+
+// ============================================================
+//  EMAIL УВЕДОМЛЕНИЕ
+// ============================================================
+function notifyAdmin(data) {
+    const adminEmail = 'ВАШ@gmail.com'; // ← ЗАМЕНИ
+
+    MailApp.sendEmail({
+        to:      adminEmail,
+        subject: `🛍 ${data.orderNum} — новый заказ Jum-Жом`,
+        htmlBody: `
+        <div style="font-family:sans-serif;max-width:520px;background:#111;color:#eee;padding:32px;border-radius:8px">
+            <div style="font-size:0.65rem;letter-spacing:3px;color:#a855f7;text-transform:uppercase;margin-bottom:8px">Новый заказ</div>
+            <h2 style="margin:0 0 24px;font-size:1.4rem">${data.orderNum}</h2>
+            <table style="width:100%;border-collapse:collapse">
+                ${row('Дата',      data.date)}
+                ${row('Имя',       data.name)}
+                ${row('Телефон',   data.phone)}
+                ${row('Email',     data.email)}
+                ${row('Адрес',     data.address)}
+                ${row('Товар',     data.product)}
+                ${row('Неделя',    data.week)}
+                ${row('Устройство',data.device||'—')}
+            </table>
+            <div style="margin-top:24px;padding:16px;background:#1a1a1a;border-radius:4px">
+                <div style="font-size:0.6rem;letter-spacing:2px;color:#555;text-transform:uppercase;margin-bottom:4px">Сумма</div>
+                <div style="font-size:1.6rem;font-weight:800;color:#e74c3c">${data.price}</div>
+            </div>
+        </div>`
+    });
+}
+
+function row(key, val) {
+    return `<tr>
+        <td style="padding:8px 0;color:#666;border-bottom:1px solid #222;font-size:0.82rem">${key}</td>
+        <td style="padding:8px 0;border-bottom:1px solid #222;font-size:0.82rem">${val}</td>
+    </tr>`;
+}
+
+function respond(data) {
+    return ContentService
+        .createTextOutput(JSON.stringify(data))
+        .setMimeType(ContentService.MimeType.JSON);
+}

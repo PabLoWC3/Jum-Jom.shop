@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jum-Жом — Товар недели</title>
+    <link rel="icon" href="favicon.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --bg:#141414;--bg2:#0f0f0f;--card:#111;
+            --accent:#c0392b;--accent2:#e74c3c;
+            --purple:#4a1f7c;--purple2:#7c3aed;--purple3:#a855f7;
+            --text:#f0f0f0;--text2:#999;--text3:#555;
+            --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.1)
+        }
+        html,body{height:100%}
+        body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+        /* HEADER */
+        header{position:sticky;top:0;z-index:200;background:rgba(14,14,14,0.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+        .header-top{display:flex;align-items:center;justify-content:space-between;padding:0 60px;height:70px}
+        .logo-block{display:flex;align-items:center;gap:14px}
+        .logo-img{width:42px;height:42px;object-fit:contain;border-radius:6px}
+        .logo-name{font-size:1.2rem;font-weight:800;letter-spacing:3px;text-transform:uppercase}
+        .logo-name em{color:var(--purple3);font-style:normal}
+        .header-center{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.03);border:1px solid var(--border2);border-radius:6px;padding:10px 20px}
+        .hc-label{font-size:0.58rem;letter-spacing:2px;color:var(--text2);text-transform:uppercase}
+        .hc-sep{color:var(--text3)}
+        .hc-timer{font-size:1rem;font-weight:700;letter-spacing:3px;color:var(--accent2);font-variant-numeric:tabular-nums}
+        .week-pill{font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--purple3);background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);padding:6px 14px;border-radius:20px}
+        .header-progress{height:2px;background:var(--bg2)}
+        .header-progress-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--accent));transition:width 1s ease}
+
+        /* HERO */
+        .hero{position:relative;padding:80px 60px 60px;overflow:hidden;border-bottom:1px solid var(--border)}
+        .hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 0% 50%,rgba(74,31,124,0.15) 0%,transparent 70%),radial-gradient(ellipse 40% 60% at 100% 50%,rgba(192,57,43,0.08) 0%,transparent 70%);pointer-events:none}
+        .hero-inner{position:relative;max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+        .hero-tag{display:inline-flex;align-items:center;gap:8px;font-size:0.6rem;letter-spacing:3px;text-transform:uppercase;color:var(--text2);margin-bottom:24px}
+        .hero-tag::before{content:'';width:20px;height:1px;background:var(--text3)}
+        .hero-title{font-size:clamp(2rem,4vw,3.5rem);font-weight:900;line-height:1.08;letter-spacing:-1px;margin-bottom:20px}
+        .hero-title .aw{background:linear-gradient(135deg,var(--purple3),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .hero-sub{font-size:0.88rem;color:var(--text2);line-height:1.7;max-width:400px;margin-bottom:40px}
+        .hero-stats{display:flex;gap:40px}
+        .hs-num{font-size:1.8rem;font-weight:800;letter-spacing:-1px}
+        .hs-label{font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-top:4px}
+        .hero-right{display:flex;justify-content:center}
+
+        /* SHOWCASE */
+        .product-showcase{position:relative;width:320px;height:380px}
+        .showcase-card{width:100%;height:100%;background:linear-gradient(145deg,#1a1a2e,#0d0d0d);border:1px solid var(--border2);border-radius:4px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+        .showcase-card::before{content:'';position:absolute;top:0;left:0;width:40px;height:40px;border-top:2px solid var(--purple2);border-left:2px solid var(--purple2)}
+        .showcase-card::after{content:'';position:absolute;bottom:0;right:0;width:40px;height:40px;border-bottom:2px solid var(--accent);border-right:2px solid var(--accent)}
+        .sc-corner-tr{position:absolute;top:0;right:0;width:40px;height:40px;border-top:2px solid var(--accent);border-right:2px solid var(--accent)}
+        .sc-corner-bl{position:absolute;bottom:0;left:0;width:40px;height:40px;border-bottom:2px solid var(--purple2);border-left:2px solid var(--purple2)}
+        .showcase-img{width:100%;height:100%;object-fit:cover;display:block;animation:floatAnim 5s ease-in-out infinite}
+        @keyframes floatAnim{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-10px) scale(1.02)}}
+        .sc-badge-top{position:absolute;top:16px;left:50%;transform:translateX(-50%);font-size:0.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--text2);background:rgba(0,0,0,0.7);border:1px solid var(--border2);padding:4px 12px;border-radius:2px;white-space:nowrap;z-index:2}
+        .sc-badge-live{position:absolute;bottom:16px;right:16px;display:flex;align-items:center;gap:6px;font-size:0.58rem;letter-spacing:1px;color:#ff6b6b;background:rgba(192,57,43,0.15);border:1px solid rgba(192,57,43,0.3);padding:5px 10px;border-radius:2px;z-index:2}
+        .live-dot{width:5px;height:5px;background:var(--accent2);border-radius:50%;animation:blink 1.2s infinite}
+        @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+        .sold-overlay{display:none;position:absolute;inset:0;background:rgba(10,10,10,0.94);flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:5}
+        .sold-overlay.show{display:flex}
+        .sold-icon{font-size:3rem;opacity:0.4}
+        .sold-text{font-size:0.65rem;letter-spacing:4px;text-transform:uppercase;color:var(--text2)}
+
+        /* PRODUCT */
+        .product-section{padding:60px;border-bottom:1px solid var(--border)}
+        .product-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start}
+        .section-label{font-size:0.6rem;letter-spacing:3px;text-transform:uppercase;color:var(--text3);margin-bottom:20px;display:flex;align-items:center;gap:12px}
+        .section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+        .prod-name{font-size:clamp(1.5rem,2.5vw,2.2rem);font-weight:800;letter-spacing:-0.5px;line-height:1.15;margin-bottom:16px}
+        .prod-desc{font-size:0.85rem;color:var(--text2);line-height:1.75;margin-bottom:32px}
+        .prod-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:32px}
+        .meta-cell{background:var(--card);padding:16px 20px}
+        .mc-label{font-size:0.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+        .mc-val{font-size:1.05rem;font-weight:700;display:flex;align-items:baseline;gap:4px}
+        .mc-val .unit{font-size:0.7rem;font-weight:400;color:var(--text2)}
+        .mc-val .rub{color:var(--accent2)}
+        .stock-block{margin-bottom:32px}
+        .stock-header{display:flex;justify-content:space-between;margin-bottom:10px}
+        .stock-label{font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--text3)}
+        .stock-nums{font-size:0.75rem;color:var(--text2)}
+        .stock-nums b{color:var(--text)}
+        .progress-bar{height:2px;background:rgba(255,255,255,0.05);position:relative}
+        .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--purple2),var(--accent));transition:width 1.5s ease;position:relative}
+        .progress-bar-fill::after{content:'';position:absolute;right:-1px;top:-3px;width:2px;height:8px;background:var(--accent2)}
+        .btn-group{display:flex;align-items:center;gap:16px}
+        .btn-main{flex:1;background:var(--accent);border:none;padding:16px 24px;color:#fff;font-size:0.72rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.2s}
+        .btn-main:hover{background:var(--accent2)}
+        .btn-main:disabled{background:#222;color:var(--text3);cursor:not-allowed}
+        .btn-sub{font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--text3);white-space:nowrap}
+        .detail-block{background:var(--card);border:1px solid var(--border);margin-bottom:1px}
+        .detail-header{padding:14px 20px;font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+        .detail-header span{transition:transform 0.2s}
+        .detail-header.open span{transform:rotate(180deg)}
+        .detail-body{padding:20px;display:none}
+        .detail-body.open{display:block}
+        .detail-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.82rem}
+        .detail-row:last-child{border:none}
+        .dr-key{color:var(--text2)}
+        .dr-val{font-weight:500}
+        .guarantee-row{display:flex;gap:0;margin-top:24px}
+        .g-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px 10px;background:var(--card);border:1px solid var(--border);margin-right:1px;text-align:center}
+        .g-item:last-child{margin-right:0}
+        .g-icon{font-size:1.1rem;opacity:0.6}
+        .g-text{font-size:0.58rem;letter-spacing:1px;text-transform:uppercase;color:var(--text3);line-height:1.5}
+
+        /* CHECKOUT */
+        .checkout-overlay{display:none;position:fixed;inset:0;background:var(--bg);z-index:1000;overflow-y:auto}
+        .checkout-overlay.show{display:block}
+        .checkout-page{min-height:100vh;display:grid;grid-template-columns:1fr 400px;max-width:1100px;margin:0 auto}
+        .co-left{padding:60px;border-right:1px solid var(--border)}
+        .co-back{display:inline-flex;align-items:center;gap:10px;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--text2);cursor:pointer;margin-bottom:40px;background:none;border:none;font-family:'Inter',sans-serif;transition:color 0.2s}
+        .co-back:hover{color:var(--text)}
+        .co-title{font-size:2rem;font-weight:800;letter-spacing:-0.5px;margin-bottom:6px}
+        .co-subtitle{font-size:0.8rem;color:var(--text2);margin-bottom:44px}
+        .co-steps{display:flex;align-items:center;margin-bottom:40px}
+        .co-step{display:flex;align-items:center;gap:10px}
+        .step-num{width:28px;height:28px;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:var(--text3);border-radius:2px;flex-shrink:0}
+        .step-num.active{background:var(--accent);border-color:var(--accent);color:#fff}
+        .step-num.done{background:var(--purple2);border-color:var(--purple2);color:#fff}
+        .step-label{font-size:0.6rem;letter-spacing:1px;text-transform:uppercase;color:var(--text3)}
+        .step-label.active{color:var(--text)}
+        .step-line{flex:1;height:1px;background:var(--border);margin:0 16px}
+        .form-section{display:none}
+        .form-section.active{display:block}
+        .fs-title{font-size:0.6rem;letter-spacing:3px;text-transform:uppercase;color:var(--text3);margin-bottom:24px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+        .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+        .form-grid.single{grid-template-columns:1fr}
+        .form-group{display:flex;flex-direction:column;gap:8px}
+        .form-label{font-size:0.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--text3)}
+        .form-input{background:var(--card);border:1px solid var(--border2);padding:14px 16px;color:var(--text);font-size:0.88rem;outline:none;font-family:'Inter',sans-serif;transition:border-color 0.2s;border-radius:2px;width:100%}
+        .form-input::placeholder{color:var(--text3)}
+        .form-input:focus{border-color:var(--purple2)}
+        .form-input.error{border-color:var(--accent)}
+
+        /* ЧЕКБОКСЫ */
+        .checkbox-group{display:flex;flex-direction:column;gap:14px;margin-top:24px;margin-bottom:8px}
+        .checkbox-item{display:flex;align-items:flex-start;gap:12px;cursor:pointer}
+        .checkbox-item input[type="checkbox"]{display:none}
+        .checkbox-box{width:18px;height:18px;border:1px solid var(--border2);border-radius:2px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;background:var(--card)}
+        .checkbox-item input:checked + .checkbox-box{background:var(--purple2);border-color:var(--purple2)}
+        .checkbox-item input:checked + .checkbox-box::after{content:'✓';font-size:0.7rem;color:#fff;font-weight:700}
+        .checkbox-item.error .checkbox-box{border-color:var(--accent)}
+        .checkbox-text{font-size:0.75rem;color:var(--text2);line-height:1.6}
+        .checkbox-text a{color:var(--purple3);text-decoration:none;border-bottom:1px solid rgba(168,85,247,0.3);transition:border-color 0.2s}
+        .checkbox-text a:hover{border-color:var(--purple3)}
+
+        /* КАРТА */
+        .card-visual{background:linear-gradient(135deg,#1a1a2e,#2d1b69);border:1px solid rgba(124,58,237,0.3);border-radius:8px;padding:24px;margin-bottom:24px;position:relative;overflow:hidden;height:160px}
+        .card-visual::before{content:'';position:absolute;right:-30px;top:-30px;width:160px;height:160px;border-radius:50%;background:rgba(168,85,247,0.1)}
+        .card-chip{width:34px;height:26px;background:linear-gradient(135deg,var(--purple2),var(--purple3));border-radius:4px;margin-bottom:24px}
+        .card-number-display{font-size:1.05rem;font-weight:600;letter-spacing:4px;color:rgba(255,255,255,0.85);margin-bottom:12px}
+        .card-bottom{display:flex;justify-content:space-between;align-items:flex-end}
+        .card-holder-display,.card-expiry-display{font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.5)}
+        .payment-icons{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+        .pi-label{font-size:0.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--text3)}
+        .pi-badges{display:flex;gap:6px}
+        .pi-badge{background:var(--card);border:1px solid var(--border2);padding:4px 8px;font-size:0.62rem;font-weight:700;color:var(--text2);border-radius:2px}
+        .form-nav{display:flex;gap:12px;margin-top:32px}
+        .btn-next{flex:1;background:var(--accent);border:none;padding:16px;color:#fff;font-size:0.7rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.2s}
+        .btn-next:hover{background:var(--accent2)}
+        .btn-next:disabled{background:#333;color:var(--text3);cursor:not-allowed}
+        .btn-prev-step{background:none;border:1px solid var(--border2);padding:16px 20px;color:var(--text2);font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s}
+        .btn-prev-step:hover{border-color:var(--text2);color:var(--text)}
+
+        /* SUMMARY */
+        .co-right{padding:60px 40px;background:var(--bg2);border-left:1px solid var(--border)}
+        .summary-title{font-size:0.6rem;letter-spacing:3px;text-transform:uppercase;color:var(--text3);margin-bottom:24px}
+        .summary-product{display:flex;gap:16px;margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--border)}
+        .sp-img{width:80px;height:80px;background:var(--card);border:1px solid var(--border2);overflow:hidden;flex-shrink:0}
+        .sp-img img{width:100%;height:100%;object-fit:cover}
+        .sp-name{font-size:0.88rem;font-weight:600;margin-bottom:4px}
+        .sp-week{font-size:0.6rem;letter-spacing:1px;color:var(--text3);text-transform:uppercase}
+        .sum-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:0.82rem}
+        .sr-key{color:var(--text2)}
+        .sr-val{font-weight:500}
+        .sum-total{display:flex;justify-content:space-between;padding:16px 0;border-top:1px solid var(--border2);margin-top:8px}
+        .st-key{font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--text3)}
+        .st-val{font-size:1.3rem;font-weight:800}
+        .summary-secure{margin-top:24px;padding:14px;background:rgba(124,58,237,0.05);border:1px solid rgba(124,58,237,0.15);display:flex;align-items:flex-start;gap:10px}
+        .ss-icon{font-size:0.9rem;opacity:0.5}
+        .ss-text{font-size:0.7rem;color:var(--text3);line-height:1.6}
+
+        /* SUCCESS */
+        .success-overlay{display:none;position:fixed;inset:0;background:var(--bg);z-index:2000;align-items:center;justify-content:center}
+        .success-overlay.show{display:flex}
+        .success-content{max-width:460px;width:90%;text-align:center;padding:60px 40px}
+        .success-mark{width:60px;height:60px;border:1px solid var(--purple2);border-radius:2px;display:flex;align-items:center;justify-content:center;margin:0 auto 32px;font-size:1.4rem;color:var(--purple3)}
+        .success-tag{font-size:0.58rem;letter-spacing:4px;text-transform:uppercase;color:var(--text3);margin-bottom:14px}
+        .success-title{font-size:2rem;font-weight:800;letter-spacing:-0.5px;margin-bottom:10px}
+        .success-num{font-size:0.75rem;color:var(--purple3);letter-spacing:3px;margin-bottom:20px}
+        .success-text{font-size:0.82rem;color:var(--text2);line-height:1.75;margin-bottom:36px}
+        .success-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:32px;text-align:left}
+        .sig-cell{background:var(--card);padding:14px 16px}
+        .sig-label{font-size:0.56rem;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+        .sig-val{font-size:0.82rem;font-weight:600}
+        .btn-success-ok{background:none;border:1px solid var(--border2);padding:13px 36px;color:var(--text2);font-size:0.62rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s}
+        .btn-success-ok:hover{border-color:var(--text2);color:var(--text)}
+
+        /* FOOTER */
+        footer{border-top:1px solid var(--border);padding:24px 60px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+        .footer-logo{font-size:0.68rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--text2)}
+        .footer-logo em{color:var(--purple3);font-style:normal}
+        .footer-links{display:flex;gap:20px}
+        .footer-link{font-size:0.6rem;letter-spacing:1px;text-transform:uppercase;color:var(--text3);text-decoration:none;transition:color 0.2s}
+        .footer-link:hover{color:var(--text2)}
+        .footer-copy{font-size:0.6rem;color:var(--text3)}
+
+        /* MOBILE */
+        @media(max-width:1024px){
+            .header-top{padding:0 30px}
+            .hero{padding:60px 30px 50px}
+            .product-section{padding:50px 30px}
+            footer{padding:20px 30px}
+        }
+        @media(max-width:768px){
+            .header-top{padding:0 16px;height:56px}
+            .header-center{display:none}
+            .logo-name{font-size:1rem}
+            .logo-img{width:34px;height:34px}
+            .hero{padding:40px 16px 36px}
+            .hero-inner{grid-template-columns:1fr;gap:0}
+            .hero-right{display:none}
+            .hero-title{font-size:2rem}
+            .hero-stats{gap:24px}
+            .hs-num{font-size:1.4rem}
+            .product-section{padding:36px 16px}
+            .product-inner{grid-template-columns:1fr;gap:36px}
+            .prod-meta{grid-template-columns:repeat(3,1fr)}
+            .checkout-page{grid-template-columns:1fr}
+            .co-right{display:none}
+            .co-left{padding:32px 16px}
+            .form-grid{grid-template-columns:1fr}
+            footer{padding:16px;flex-direction:column;text-align:center}
+            .footer-links{justify-content:center}
+            .btn-group{flex-direction:column;align-items:stretch}
+            .btn-sub{text-align:center}
+        }
+        @media(max-width:480px){
+            .hero-title{font-size:1.7rem}
+            .prod-name{font-size:1.4rem}
+            .co-title{font-size:1.5rem}
+            .prod-meta{grid-template-columns:1fr 1fr}
+            .success-info-grid{grid-template-columns:1fr}
+            .hero-stats{gap:16px}
+            .hs-num{font-size:1.2rem}
+        }
+
+        /* TABLET */
+        @media(min-width:769px) and (max-width:1024px){
+            .hero-inner{gap:40px}
+            .product-showcase{width:260px;height:320px}
+            .product-inner{gap:40px}
+            .checkout-page{grid-template-columns:1fr 320px}
+            .co-right{padding:40px 24px}
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-top">
+        <div class="logo-block">
+            <img class="logo-img" src="favicon.png" alt="Jum-Жом" />
+            <div class="logo-name">JUM<em>-</em>ЖОМ</div>
+        </div>
+        <div class="header-center">
+            <div class="hc-label">До закрытия</div>
+            <div class="hc-sep">/</div>
+            <div class="hc-timer" id="timerDisplay">00:00:00:00</div>
+        </div>
+        <div class="week-pill">Неделя #<span id="weekPill">01</span></div>
+    </div>
+    <div class="header-progress">
+        <div class="header-progress-fill" id="headerProgress" style="width:0%"></div>
+    </div>
+</header>
+
+<section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-inner">
+        <div class="hero-left">
+            <div class="hero-tag">Товар недели</div>
+            <h1 class="hero-title">Один товар.<br><span class="aw">Одна неделя.</span><br>Навсегда.</h1>
+            <p class="hero-sub">Каждый понедельник — новый эксклюзивный товар. Время вышло — он исчезает навсегда.</p>
+            <div class="hero-stats">
+                <div><div class="hs-num" id="heroWeekNum">01</div><div class="hs-label">Неделя</div></div>
+                <div><div class="hs-num" id="heroLeft">—</div><div class="hs-label">Осталось</div></div>
+                <div><div class="hs-num" id="heroPrice">—</div><div class="hs-label">Рублей</div></div>
+            </div>
+        </div>
+        <div class="hero-right">
+            <div class="product-showcase">
+                <div class="showcase-card">
+                    <div class="sc-corner-tr"></div>
+                    <div class="sc-corner-bl"></div>
+                    <div class="sold-overlay" id="soldOverlay">
+                        <div class="sold-icon">⛔</div>
+                        <div class="sold-text">Недоступно</div>
+                    </div>
+                    <img class="showcase-img" id="pImg" src="" alt="Товар" />
+                    <div class="sc-badge-top" id="scBadgeTop">Неделя 01</div>
+                    <div class="sc-badge-live"><div class="live-dot"></div>В продаже</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="product-section">
+    <div class="product-inner">
+        <div class="prod-left">
+            <div class="section-label">Товар недели</div>
+            <div class="prod-name" id="pName">Загрузка...</div>
+            <div class="prod-desc" id="pDesc"></div>
+            <div class="prod-meta">
+                <div class="meta-cell">
+                    <div class="mc-label">Эдиция</div>
+                    <div class="mc-val"><span id="pEdition">—</span><span class="unit">шт</span></div>
+                </div>
+                <div class="meta-cell">
+                    <div class="mc-label">Цена</div>
+                    <div class="mc-val"><span id="pPrice">—</span><span class="rub unit">₽</span></div>
+                </div>
+                <div class="meta-cell">
+                    <div class="mc-label">Доставка</div>
+                    <div class="mc-val" style="font-size:0.88rem" id="pDelivery">—</div>
+                </div>
+            </div>
+            <div class="stock-block">
+                <div class="stock-header">
+                    <div class="stock-label">Остаток</div>
+                    <div class="stock-nums"><b id="stockLeft">—</b> / <span id="stockTotal">—</span> шт</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn-main" id="buyBtn" onclick="openCheckout()">Оформить заказ →</button>
+                <div class="btn-sub">Не появится снова</div>
+            </div>
+        </div>
+        <div class="prod-right">
+            <div class="detail-block">
+                <div class="detail-header" onclick="toggleDetail(this)">Характеристики <span>↓</span></div>
+                <div class="detail-body" id="pSpecs"></div>
+            </div>
+            <div class="detail-block">
+                <div class="detail-header" onclick="toggleDetail(this)">Доставка и оплата <span>↓</span></div>
+                <div class="detail-body">
+                    <div class="detail-row"><span class="dr-key">Срок</span><span class="dr-val" id="detDelivery">—</span></div>
+                    <div class="detail-row"><span class="dr-key">Оплата</span><span class="dr-val">Карта, СБП</span></div>
+                    <div class="detail-row"><span class="dr-key">Возврат</span><span class="dr-val">14 дней</span></div>
+                </div>
+            </div>
+            <div class="guarantee-row">
+                <div class="g-item"><div class="g-icon">🔒</div><div class="g-text">Безопасная<br>оплата</div></div>
+                <div class="g-item"><div class="g-icon">🚚</div><div class="g-text">Быстрая<br>доставка</div></div>
+                <div class="g-item"><div class="g-icon">↩️</div><div class="g-text">Возврат<br>14 дней</div></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="footer-logo">JUM<em>-</em>ЖОМ</div>
+    <div class="footer-links">
+        <a class="footer-link" href="privacy.html">Персональные данные</a>
+        <a class="footer-link" href="policy.html">Политика товаров</a>
+    </div>
+    <div class="footer-copy">© 2025 Jum-Жом</div>
+</footer>
+
+<!-- CHECKOUT -->
+<div class="checkout-overlay" id="checkoutOverlay">
+    <div class="checkout-page">
+        <div class="co-left">
+            <button class="co-back" onclick="closeCheckout()">← Назад</button>
+            <div class="co-title">Оформление</div>
+            <div class="co-subtitle">Заполните данные для завершения покупки</div>
+            <div class="co-steps">
+                <div class="co-step"><div class="step-num active" id="sn1">1</div><div class="step-label active" id="sl1">Контакты</div></div>
+                <div class="step-line"></div>
+                <div class="co-step"><div class="step-num" id="sn2">2</div><div class="step-label" id="sl2">Доставка</div></div>
+                <div class="step-line"></div>
+                <div class="co-step"><div class="step-num" id="sn3">3</div><div class="step-label" id="sl3">Оплата</div></div>
+            </div>
+
+            <!-- ШАГ 1 -->
+            <div class="form-section active" id="step1">
+                <div class="fs-title">Контактные данные</div>
+                <div class="form-grid">
+                    <div class="form-group"><label class="form-label">Имя</label><input class="form-input" id="f_name" type="text" placeholder="Иван" /></div>
+                    <div class="form-group"><label class="form-label">Фамилия</label><input class="form-input" id="f_surname" type="text" placeholder="Иванов" /></div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group"><label class="form-label">Телефон</label><input class="form-input" id="f_phone" type="tel" placeholder="+7 999 000 00 00" /></div>
+                    <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="f_email" type="email" placeholder="ivan@mail.ru" /></div>
+                </div>
+                <div class="form-nav">
+                    <button class="btn-next" onclick="goStep(2)">Далее — Доставка →</button>
+                </div>
+            </div>
+
+            <!-- ШАГ 2 -->
+            <div class="form-section" id="step2">
+                <div class="fs-title">Адрес доставки</div>
+                <div class="form-grid single"><div class="form-group"><label class="form-label">Город</label><input class="form-input" id="f_city" type="text" placeholder="Москва" /></div></div>
+                <div class="form-grid single"><div class="form-group"><label class="form-label">Улица и дом</label><input class="form-input" id="f_street" type="text" placeholder="ул. Пушкина, д. 10" /></div></div>
+                <div class="form-grid">
+                    <div class="form-group"><label class="form-label">Квартира</label><input class="form-input" id="f_apt" type="text" placeholder="42" /></div>
+                    <div class="form-group"><label class="form-label">Индекс</label><input class="form-input" id="f_zip" type="text" placeholder="123456" /></div>
+                </div>
+                <div class="form-nav">
+                    <button class="btn-prev-step" onclick="goStep(1)">← Назад</button>
+                    <button class="btn-next" onclick="goStep(3)">Далее — Оплата →</button>
+                </div>
+            </div>
+
+            <!-- ШАГ 3 -->
+            <div class="form-section" id="step3">
+                <div class="fs-title">Данные карты</div>
+                <div class="card-visual">
+                    <div class="card-chip"></div>
+                    <div class="card-number-display" id="cardDisplay">•••• •••• •••• ••••</div>
+                    <div class="card-bottom">
+                        <div class="card-holder-display" id="cardHolder">Ваше имя</div>
+                        <div class="card-expiry-display" id="cardExpiry">MM/YY</div>
+                    </div>
+                </div>
+                <div class="payment-icons">
+                    <div class="pi-label">Принимаем</div>
+                    <div class="pi-badges">
+                        <div class="pi-badge">VISA</div><div class="pi-badge">MC</div>
+                        <div class="pi-badge">МИР</div><div class="pi-badge">СБП</div>
+                    </div>
+                </div>
+                <div class="form-grid single"><div class="form-group"><label class="form-label">Номер карты</label><input class="form-input" id="f_card" type="text" placeholder="0000 0000 0000 0000" maxlength="19" oninput="formatCard(this)" /></div></div>
+                <div class="form-grid">
+                    <div class="form-group"><label class="form-label">Срок действия</label><input class="form-input" id="f_expiry" type="text" placeholder="MM/YY" maxlength="5" oninput="formatExpiry(this)" /></div>
+                    <div class="form-group"><label class="form-label">CVV</label><input class="form-input" id="f_cvv" type="password" placeholder="•••" maxlength="3" /></div>
+                </div>
+                <div class="form-grid single"><div class="form-group"><label class="form-label">Имя на карте</label><input class="form-input" id="f_holder" type="text" placeholder="IVAN IVANOV" oninput="updateCardHolder(this)" /></div></div>
+
+                <!-- ЧЕКБОКСЫ -->
+                <div class="checkbox-group">
+                    <label class="checkbox-item" id="cb1-wrap">
+                        <input type="checkbox" id="cb_privacy" />
+                        <div class="checkbox-box"></div>
+                        <span class="checkbox-text">
+                            Я согласен(а) с <a href="privacy.html" target="_blank">политикой обработки персональных данных</a> и даю согласие Jum-Жом на обработку моих персональных данных в целях исполнения заказа
+                        </span>
+                    </label>
+                    <label class="checkbox-item" id="cb2-wrap">
+                        <input type="checkbox" id="cb_policy" />
+                        <div class="checkbox-box"></div>
+                        <span class="checkbox-text">
+                            Я ознакомлен(а) с <a href="policy.html" target="_blank">политикой в отношении товаров</a> и понимаю, что Jum-Жом не несёт ответственности за соответствие товара фотографиям и характеристикам, указанным на сайте
+                        </span>
+                    </label>
+                </div>
+
+                <div class="form-nav">
+                    <button class="btn-prev-step" onclick="goStep(2)">← Назад</button>
+                    <button class="btn-next" id="payBtn" onclick="processPayment()">Оплатить →</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="co-right">
+            <div class="summary-title">Ваш заказ</div>
+            <div class="summary-product">
+                <div class="sp-img"><img id="sumImg" src="" alt="" /></div>
+                <div class="sp-info">
+                    <div class="sp-name" id="sumName">—</div>
+                    <div class="sp-week" id="sumWeek">—</div>
+                </div>
+            </div>
+            <div class="sum-row"><span class="sr-key">Товар</span><span class="sr-val" id="sumPrice">—</span></div>
+            <div class="sum-row"><span class="sr-key">Доставка</span><span class="sr-val">Бесплатно</span></div>
+            <div class="sum-total"><span class="st-key">Итого</span><span class="st-val" id="sumTotal">—</span></div>
+            <div class="summary-secure">
+                <span class="ss-icon">🔒</span>
+                <span class="ss-text">Платёж защищён 256-битным шифрованием. Данные карты не хранятся на наших серверах.</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SUCCESS -->
+<div class="success-overlay" id="successOverlay">
+    <div class="success-content">
+        <div class="success-mark">✓</div>
+        <div class="success-tag">Заказ подтверждён</div>
+        <div class="success-title">Спасибо!</div>
+        <div class="success-num" id="successOrderNum">#JUM-0000</div>
+        <div class="success-text">Ваш заказ принят и передан в обработку.<br>Мы свяжемся с вами в течение 15 минут.</div>
+        <div class="success-info-grid">
+            <div class="sig-cell"><div class="sig-label">Товар</div><div class="sig-val" id="sucProduct">—</div></div>
+            <div class="sig-cell"><div class="sig-label">Сумма</div><div class="sig-val" id="sucPrice">—</div></div>
+            <div class="sig-cell"><div class="sig-label">Доставка</div><div class="sig-val" id="sucDelivery">—</div></div>
+            <div class="sig-cell"><div class="sig-label">Email</div><div class="sig-val" id="sucEmail">—</div></div>
+        </div>
+        <button class="btn-success-ok" onclick="closeSuccess()">Закрыть</button>
+    </div>
+</div>
+
+<script>
+// ================================================================
+//  НАСТРОЙКИ — ЗАМЕНИ НА СВОИ
+// ================================================================
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwvdyxUCtiGP96jH59Pmrxp8mnnusGmsInzTmVXbdlH9bM65ZkuYpwWdYHQO6RH8ksEBw/exec';
+
+// ================================================================
+//  ТОВАРЫ — ЗАМЕНИ img НА ПУТИ К СВОИМ ФОТО
+// ================================================================
+const products = [
+    {
+        img:'images/product1.jpg', week:'Неделя 01 · Электроника',
+        name:'Pro Wireless Headphones X1',
+        desc:'Беспроводные наушники с шумоподавлением. 40 часов автономной работы.',
+        edition:150, price:'4 990', delivery:'3–5 дней',
+        specs:{ Тип:'Наушники', Подключение:'Bluetooth 5.3', Батарея:'40 часов', Цвет:'Чёрный' }
+    },
+    {
+        img:'images/product2.jpg', week:'Неделя 02 · Гаджеты',
+        name:'SmartWatch Dark Edition',
+        desc:'Умные часы с AMOLED дисплеем. GPS, мониторинг, 7 дней без зарядки.',
+        edition:100, price:'7 490', delivery:'5–7 дней',
+        specs:{ Тип:'Смарт-часы', Дисплей:'AMOLED', GPS:'Есть', Батарея:'7 дней' }
+    },
+    {
+        img:'images/product3.jpg', week:'Неделя 03 · Для дома',
+        name:'Barista Home Pro',
+        desc:'Профессиональная кофемашина. 15 бар, капучинатор, 5 режимов помола.',
+        edition:80, price:'12 990', delivery:'7–10 дней',
+        specs:{ Тип:'Кофемашина', Давление:'15 бар', Помол:'5 режимов', Цвет:'Чёрный' }
+    },
+    {
+        img:'images/product4.jpg', week:'Неделя 04 · Компьютеры',
+        name:'Mechanical RGB Keyboard',
+        desc:'Игровая механическая клавиатура. Cherry MX, алюминиевый корпус.',
+        edition:200, price:'5 990', delivery:'3–5 дней',
+        specs:{ Тип:'Клавиатура', Свитчи:'Cherry MX Red', Корпус:'Алюминий', Подсветка:'RGB' }
+    },
+    {
+        img:'images/product5.jpg', week:'Неделя 05 · Фото',
+        name:'Instant Camera Shadow',
+        desc:'Камера мгновенной печати. Фото за 10 секунд. Коллекционная версия.',
+        edition:120, price:'3 490', delivery:'2–4 дня',
+        specs:{ Тип:'Фотоаппарат', Печать:'10 секунд', Плёнка:'Instax Mini', Цвет:'Чёрный' }
+    }
+];
+
+// ================================================================
+//  СОСТОЯНИЕ
+// ================================================================
+let currentProduct = null;
+let currentLeft    = 0;
+let currentStep    = 1;
+let timerInterval  = null;
+
+// ================================================================
+//  НЕДЕЛЯ
+// ================================================================
+function getWeekNum() {
+    const now   = new Date();
+    const start = new Date(now.getFullYear(), 0, 1);
+    const days  = Math.floor((now - start) / 86400000);
+    return Math.ceil((days + start.getDay() + 1) / 7);
+}
+
+function getWeekKey() {
+    const now = new Date();
+    return now.getFullYear() + '-W' + String(getWeekNum()).padStart(2,'0');
+}
+
+// ================================================================
+//  ТАЙМЕР — синхронизированный, единый
+// ================================================================
+function getWeekDeadline() {
+    const now  = new Date();
+    const day  = now.getDay();
+    const diff = (8 - day) % 7 || 7;
+    const dl   = new Date(now);
+    dl.setDate(now.getDate() + diff);
+    dl.setHours(0, 0, 0, 0);
+    return dl;
+}
+
+function pad(n) { return String(n).padStart(2,'0'); }
+
+function startTimer() {
+    if (timerInterval) clearInterval(timerInterval);
+
+    function tick() {
+        const deadline = getWeekDeadline();
+        const now      = new Date();
+        const diff     = deadline - now;
+
+        if (diff <= 0) {
+            // Время вышло — показываем sold overlay
+            document.getElementById('timerDisplay').textContent = '00:00:00:00';
+            document.getElementById('soldOverlay').classList.add('show');
+            document.getElementById('buyBtn').disabled = true;
+
+            // Ждём начала новой недели и перезапускаем
+            setTimeout(() => {
+                location.reload();
+            }, 3000);
+            return;
+        }
+
+        const d = Math.floor(diff / 86400000);
+        const h = Math.floor((diff % 86400000) / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+
+        document.getElementById('timerDisplay').textContent =
+            pad(d) + ':' + pad(h) + ':' + pad(m) + ':' + pad(s);
+    }
+
+    tick();
+    timerInterval = setInterval(tick, 1000);
+}
+
+// ================================================================
+//  ЗАГРУЗКА ТОВАРА + ОСТАТКОВ ИЗ SHEETS
+// ================================================================
+async function loadProduct() {
+    const wk    = getWeekNum();
+    const wkKey = getWeekKey();
+    const p     = products[wk % products.length];
+    currentProduct = p;
+
+    const wkStr = String(wk).padStart(2,'0');
+
+    // Сначала показываем из localStorage (мгновенно)
+    const cached = localStorage.getItem('stock_' + wkKey);
+    if (cached) {
+        const s = JSON.parse(cached);
+        currentLeft = s.left;
+        renderStock(p, wkStr, s.left);
+    } else {
+        currentLeft = p.edition;
+        renderStock(p, wkStr, p.edition);
+    }
+
+    // Затем синхронизируем с сервером
+    try {
+        const url = SHEETS_URL + '?type=getStock&weekKey=' + encodeURIComponent(wkKey);
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (data.status === 'ok' && data.total > 0) {
+            currentLeft = data.left;
+            // Сохраняем в localStorage
+            localStorage.setItem('stock_' + wkKey, JSON.stringify({
+                left:  data.left,
+                total: data.total,
+                sold:  data.sold,
+                ts:    Date.now()
+            }));
+            renderStock(p, wkStr, data.left);
+        }
+    } catch(e) {
+        console.warn('Stock sync error:', e);
+    }
+}
+
+function renderStock(p, wkStr, left) {
+    const pct = Math.round((left / p.edition) * 100);
+
+    document.getElementById('weekPill').textContent       = wkStr;
+    document.getElementById('heroWeekNum').textContent    = wkStr;
+    document.getElementById('heroLeft').textContent       = left;
+    document.getElementById('heroPrice').textContent      = p.price;
+    document.getElementById('pImg').src                   = p.img;
+    document.getElementById('scBadgeTop').textContent     = p.week;
+    document.getElementById('pName').textContent          = p.name;
+    document.getElementById('pDesc').textContent          = p.desc;
+    document.getElementById('pEdition').textContent       = p.edition;
+    document.getElementById('pPrice').textContent         = p.price;
+    document.getElementById('pDelivery').textContent      = p.delivery;
+    document.getElementById('stockLeft').textContent      = left;
+    document.getElementById('stockTotal').textContent     = p.edition;
+    document.getElementById('progressFill').style.width   = pct + '%';
+    document.getElementById('headerProgress').style.width = pct + '%';
+    document.getElementById('detDelivery').textContent    = p.delivery;
+    document.getElementById('sumImg').src                 = p.img;
+    document.getElementById('sumName').textContent        = p.name;
+    document.getElementById('sumWeek').textContent        = 'Неделя #' + wkStr;
+    document.getElementById('sumPrice').textContent       = p.price + ' ₽';
+    document.getElementById('sumTotal').textContent       = p.price + ' ₽';
+
+    document.getElementById('pSpecs').innerHTML = Object.entries(p.specs)
+        .map(([k,v]) => `<div class="detail-row"><span class="dr-key">${k}</span><span class="dr-val">${v}</span></div>`)
+        .join('');
+
+    // Если товара нет
+    if (left <= 0) {
+        document.getElementById('soldOverlay').classList.add('show');
+        document.getElementById('buyBtn').disabled = true;
+    }
+}
+
+// ================================================================
+//  АККОРДЕОН
+// ================================================================
+function toggleDetail(header) {
+    header.nextElementSibling.classList.toggle('open');
+    header.classList.toggle('open');
+}
+
+// ================================================================
+//  CHECKOUT
+// ================================================================
+function openCheckout() {
+    document.getElementById('checkoutOverlay').classList.add('show');
+    document.body.style.overflow = 'hidden';
+    goStep(1);
+}
+
+function closeCheckout() {
+    document.getElementById('checkoutOverlay').classList.remove('show');
+    document.body.style.overflow = '';
+}
+
+function goStep(n) {
+    if (n > currentStep && !validateStep(currentStep)) return;
+    currentStep = n;
+    document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+    document.getElementById('step' + n).classList.add('active');
+    [1,2,3].forEach(i => {
+        const num = document.getElementById('sn' + i);
+        const lbl = document.getElementById('sl' + i);
+        num.className = 'step-num' + (i < n ? ' done' : i === n ? ' active' : '');
+        num.textContent = i < n ? '✓' : i;
+        lbl.className = 'step-label' + (i === n ? ' active' : '');
+    });
+}
+
+function validateStep(step) {
+    const map = {
+        1: ['f_name','f_phone','f_email'],
+        2: ['f_city','f_street'],
+        3: ['f_card','f_expiry','f_cvv','f_holder']
+    };
+    let ok = true;
+    (map[step] || []).forEach(id => {
+        const el = document.getElementById(id);
+        if (!el.value.trim()) {
+            el.classList.add('error');
+            ok = false;
+            el.addEventListener('input', () => el.classList.remove('error'), {once:true});
+        }
+    });
+
+    // Проверка чекбоксов на шаге 3
+    if (step === 3) {
+        const cb1 = document.getElementById('cb_privacy');
+        const cb2 = document.getElementById('cb_policy');
+        if (!cb1.checked) {
+            document.getElementById('cb1-wrap').querySelector('.checkbox-box').style.borderColor = 'var(--accent)';
+            ok = false;
+        }
+        if (!cb2.checked) {
+            document.getElementById('cb2-wrap').querySelector('.checkbox-box').style.borderColor = 'var(--accent)';
+            ok = false;
+        }
+    }
+    return ok;
+}
+
+// ================================================================
+//  ФОРМАТИРОВАНИЕ КАРТЫ
+// ================================================================
+function formatCard(input) {
+    let v = input.value.replace(/\D/g,'').slice(0,16);
+    v = v.match(/.{1,4}/g)?.join(' ') || v;
+    input.value = v;
+    const parts = v.split(' ');
+    document.getElementById('cardDisplay').textContent =
+        [(parts[0]||'••••').padEnd(4,'•'),(parts[1]||'••••').padEnd(4,'•'),
+         (parts[2]||'••••').padEnd(4,'•'),(parts[3]||'••••').padEnd(4,'•')].join(' ');
+}
+
+function formatExpiry(input) {
+    let v = input.value.replace(/\D/g,'').slice(0,4);
+    if (v.length >= 2) v = v.slice(0,2) + '/' + v.slice(2);
+    input.value = v;
+    document.getElementById('cardExpiry').textContent = v || 'MM/YY';
+}
+
+function updateCardHolder(input) {
+    input.value = input.value.toUpperCase();
+    document.getElementById('cardHolder').textContent = input.value || 'Ваше имя';
+}
+
+// ================================================================
+//  ОПРЕДЕЛЕНИЕ УСТРОЙСТВА
+// ================================================================
+function getDevice() {
+    const w = window.innerWidth;
+    if (w <= 480)  return 'Mobile';
+    if (w <= 768)  return 'Mobile Large';
+    if (w <= 1024) return 'Tablet';
+    return 'Desktop';
+}
+
+// ================================================================
+//  ОПЛАТА + ОТПРАВКА В SHEETS
+// ================================================================
+async function processPayment() {
+    if (!validateStep(3)) return;
+
+    const btn = document.getElementById('payBtn');
+    btn.textContent = 'Обработка...';
+    btn.disabled = true;
+
+    const orderNum = '#JUM-' + Math.floor(1000 + Math.random() * 9000);
+    const p        = currentProduct;
+    const wk       = String(getWeekNum()).padStart(2,'0');
+    const wkKey    = getWeekKey();
+
+    const data = {
+        type:     'order',
+        orderNum,
+        date:     new Date().toLocaleString('ru-RU'),
+        name:     document.getElementById('f_name').value + ' ' + document.getElementById('f_surname').value,
+        phone:    document.getElementById('f_phone').value,
+        email:    document.getElementById('f_email').value,
+        address:  [
+            document.getElementById('f_city').value,
+            document.getElementById('f_street').value,
+            document.getElementById('f_apt').value ? 'кв.' + document.getElementById('f_apt').value : '',
+            document.getElementById('f_zip').value
+        ].filter(Boolean).join(', '),
+        product:    p.name,
+        week:       'Неделя #' + wk,
+        weekKey:    wkKey,
+        price:      p.price + ' ₽',
+        delivery:   p.delivery,
+        card:       '**** ' + (document.getElementById('f_card').value.slice(-4) || '????'),
+        totalStock: p.edition,
+        device:     getDevice()
+    };
+
+    try {
+        await fetch(SHEETS_URL, {
+            method:  'POST',
+            mode:    'no-cors',
+            headers: {'Content-Type':'application/json'},
+            body:    JSON.stringify(data)
+        });
+
+        // Обновляем счётчик локально сразу
+        currentLeft = Math.max(0, currentLeft - 1);
+        localStorage.setItem('stock_' + wkKey, JSON.stringify({
+            left:  currentLeft,
+            total: p.edition,
+            sold:  p.edition - currentLeft,
+            ts:    Date.now()
+        }));
+
+        // Обновляем UI
+        document.getElementById('stockLeft').textContent = currentLeft;
+        document.getElementById('heroLeft').textContent  = currentLeft;
+        const pct = Math.round((currentLeft / p.edition) * 100);
+        document.getElementById('progressFill').style.width = pct + '%';
+
+        // Показываем успех
+        closeCheckout();
+        document.getElementById('successOrderNum').textContent = orderNum;
+        document.getElementById('sucProduct').textContent   = data.product;
+        document.getElementById('sucPrice').textContent     = data.price;
+        document.getElementById('sucDelivery').textContent  = data.delivery;
+        document.getElementById('sucEmail').textContent     = data.email;
+        document.getElementById('successOverlay').classList.add('show');
+
+    } catch(e) {
+        alert('Ошибка. Попробуйте снова.');
+        console.error(e);
+    } finally {
+        btn.textContent = 'Оплатить →';
+        btn.disabled = false;
+    }
+}
+
+function closeSuccess() {
+    document.getElementById('successOverlay').classList.remove('show');
+    document.body.style.overflow = '';
+}
+
+// ================================================================
+//  СИНХРОНИЗАЦИЯ КАЖДЫЕ 30 СЕКУНД
+// ================================================================
+function startStockSync() {
+    setInterval(async () => {
+        const wkKey = getWeekKey();
+        try {
+            const url = SHEETS_URL + '?type=getStock&weekKey=' + encodeURIComponent(wkKey);
+            const res  = await fetch(url);
+            const data = await res.json();
+            if (data.status === 'ok' && data.total > 0) {
+                currentLeft = data.left;
+                localStorage.setItem('stock_' + wkKey, JSON.stringify({
+                    left: data.left, total: data.total,
+                    sold: data.sold, ts: Date.now()
+                }));
+                document.getElementById('stockLeft').textContent = data.left;
+                document.getElementById('heroLeft').textContent  = data.left;
+                const pct = Math.round((data.left / data.total) * 100);
+                document.getElementById('progressFill').style.width = pct + '%';
+                if (data.left <= 0) {
+                    document.getElementById('soldOverlay').classList.add('show');
+                    document.getElementById('buyBtn').disabled = true;
+                }
+            }
+        } catch(e) {}
+    }, 30000);
+}
+
+// ================================================================
+//  ИНИЦИАЛИЗАЦИЯ
+// ================================================================
+loadProduct();
+startTimer();
+startStockSync();
+</script>
+</body>
+</html>
